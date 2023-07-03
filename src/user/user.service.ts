@@ -19,15 +19,14 @@ export class UserService {
 
   updatePartial(id: number, userData: PatchUserDto): object {
     //findUser
-    return { user: { ...userData } };
+    return { user: { ...userData, id } };
   }
 
   update(id: number, user: UpdateUserDto): object {
-    return { user: { ...user } };
+    return { user: { ...user, id } };
   }
 
   delete(id: number) {
     console.log(`Deleting user #${id} from database.`);
-    return;
   }
 }

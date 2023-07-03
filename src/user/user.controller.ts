@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Put,
@@ -24,7 +25,7 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): object {
+  findOne(@Param('id', ParseIntPipe) id: number): object {
     return this.userService.findOne(id);
   }
 
@@ -34,18 +35,24 @@ export class UserController {
   }
 
   @Patch(':id')
-  updatePartial(@Param() id: number, @Body() userData: PatchUserDto): object {
+  updatePartial(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() userData: PatchUserDto,
+  ): object {
     return this.userService.updatePartial(id, userData);
   }
 
   @Put(':id')
-  update(@Param() id: number, @Body() userData: UpdateUserDto): object {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() userData: UpdateUserDto,
+  ): object {
     return this.userService.update(id, userData);
   }
 
   @HttpCode(204)
   @Delete(':id')
-  delete(@Param('id') id: number) {
+  delete(@Param('id', ParseIntPipe) id: number) {
     this.userService.delete(id);
   }
 }
