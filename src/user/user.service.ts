@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './create.user.dto';
 import { UpdateUserDto } from './update.user.dto';
+import { PatchUserDto } from './patch.user.dto';
 
 @Injectable()
 export class UserService {
@@ -16,13 +17,13 @@ export class UserService {
     return { user: { ...user } };
   }
 
-  updatePartial(id: number, user: UpdateUserDto): object {
+  updatePartial(id: number, userData: PatchUserDto): object {
     //findUser
-    return { user: [{ ...user }] };
+    return { user: { ...userData } };
   }
 
   update(id: number, user: UpdateUserDto): object {
-    return { user: [{ ...user }] };
+    return { user: { ...user } };
   }
 
   delete(id: number) {

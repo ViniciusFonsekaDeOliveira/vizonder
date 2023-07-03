@@ -12,6 +12,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './create.user.dto';
 import { UpdateUserDto } from './update.user.dto';
+import { PatchUserDto } from './patch.user.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,7 +34,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  updatePartial(@Param() id: number, @Body() userData: UpdateUserDto): object {
+  updatePartial(@Param() id: number, @Body() userData: PatchUserDto): object {
     return this.userService.updatePartial(id, userData);
   }
 
