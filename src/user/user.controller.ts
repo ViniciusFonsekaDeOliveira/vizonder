@@ -25,8 +25,8 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): object {
-    return this.userService.findOne(id);
+  show(@Param('id', ParseIntPipe) id: number): object {
+    return this.userService.show(id);
   }
 
   @Post()

@@ -9,7 +9,7 @@ export class UserService {
     return { users: [{}] };
   }
 
-  findOne(id: number): object {
+  show(id: number): object {
     return { user: { id } };
   }
 
