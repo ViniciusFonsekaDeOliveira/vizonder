@@ -20,39 +20,39 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll(): object {
-    return this.userService.findAll();
+  async findAll(): Promise<object> {
+    return await this.userService.findAll();
   }
 
   @Get(':id')
-  show(@Param('id', ParseIntPipe) id: number): object {
-    return this.userService.show(id);
+  async show(@Param('id', ParseIntPipe) id: number): Promise<object> {
+    return await this.userService.show(id);
   }
 
   @Post()
-  save(@Body() user: CreateUserDto): object {
-    return this.userService.save(user);
+  async save(@Body() user: CreateUserDto): Promise<object> {
+    return await this.userService.save(user);
   }
 
   @Patch(':id')
-  updatePartial(
+  async updatePartial(
     @Param('id', ParseIntPipe) id: number,
     @Body() userData: PatchUserDto,
-  ): object {
+  ): Promise<object> {
     return this.userService.updatePartial(id, userData);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() userData: UpdateUserDto,
-  ): object {
-    return this.userService.update(id, userData);
+    @Body() data: UpdateUserDto,
+  ): Promise<object> {
+    return this.userService.update(id, data);
   }
 
   @HttpCode(204)
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number) {
-    this.userService.delete(id);
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    await this.userService.delete(id);
   }
 }

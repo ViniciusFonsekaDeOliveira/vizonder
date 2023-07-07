@@ -1,16 +1,11 @@
-import {
-  IsDateString,
-  IsEmail,
-  IsInt,
-  IsNumber,
-  IsPositive,
-  IsString,
-  IsStrongPassword,
-} from 'class-validator';
+import { IsEmail, IsString, IsStrongPassword } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
-  name: string;
+  username: string;
+
+  @IsString()
+  nickname: string;
 
   @IsEmail()
   email: string;
@@ -24,15 +19,4 @@ export class CreateUserDto {
     minUppercase: 0,
   })
   password: string;
-
-  @IsPositive()
-  @IsNumber()
-  @IsInt()
-  age: number;
-
-  @IsString()
-  gender: string;
-
-  @IsDateString()
-  registrationDate: Date;
 }
