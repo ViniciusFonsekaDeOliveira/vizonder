@@ -49,6 +49,7 @@ export class UserService {
     });
   }
 
+  //Informações não passadas devem ser zeradas.
   async update(id: number, userData: UpdateUserDto): Promise<object> {
     return this.prisma.user.update({
       where: { id },

@@ -9,12 +9,15 @@ import {
   Patch,
   Post,
   Put,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './create.user.dto';
 import { UpdateUserDto } from './update.user.dto';
 import { PatchUserDto } from './patch.user.dto';
+import { LogIntecerptor } from '../interceptors/log.interceptor';
 
+@UseInterceptors(LogIntecerptor)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -44,6 +47,7 @@ export class UserController {
 
   @Put(':id')
   async update(
+    //Informações não passadas são zeradas.
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
   ): Promise<object> {
