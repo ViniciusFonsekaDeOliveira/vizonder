@@ -1,6 +1,7 @@
 import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 
+//Teste de desempenho dos métodos
 export class LogIntecerptor implements NestInterceptor {
   intercept(
     context: ExecutionContext,

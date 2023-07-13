@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './create.user.dto';
 import { UpdateUserDto } from './update.user.dto';
 import { PatchUserDto } from './patch.user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserServiceCreationException } from '../exceptions/UserServiceCreationException';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -13,19 +17,31 @@ export class UserService {
     return this.prisma.user.findMany();
   }
 
-  async show(id: number): Promise<object> {
+  async findById(id: number): Promise<User> {
     await this.exists(id);
     return this.prisma.user.findUnique({
       where: { id },
     });
   }
 
-  async save({
+  async findByEmailAndPassword(email: string, password: string): Promise<User> {
+    return this.prisma.user.findFirst({
+      where: { email, password },
+    });
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async create({
     username,
     nickname,
     email,
     password,
-  }: CreateUserDto): Promise<object> {
+  }: CreateUserDto): Promise<User> {
     try {
       return await this.prisma.user.create({
         data: {
@@ -37,11 +53,12 @@ export class UserService {
       });
     } catch (error) {
       console.error('Erro ao executar operação no Prisma:', error);
-      throw new UserServiceCreationException('Erro ao salvar usuário');
+      throw new ConflictException('Erro ao salvar usuário');
     }
   }
 
-  async updatePartial(id: number, userData: PatchUserDto): Promise<object> {
+  async updatePartial(id: number, userData: PatchUserDto): Promise<User> {
+    this.parseBirthToDateTime(userData);
     return this.prisma.user.update({
       where: {
         id,
@@ -50,8 +67,8 @@ export class UserService {
     });
   }
 
-  //Informações não passadas devem ser zeradas.
-  async update(id: number, userData: UpdateUserDto): Promise<object> {
+  async update(id: number, userData: UpdateUserDto): Promise<User> {
+    this.parseBirthToDateTime(userData);
     return this.prisma.user.update({
       where: { id },
       data: userData,
@@ -69,5 +86,17 @@ export class UserService {
     if (!(await this.prisma.user.count({ where: { id } }))) {
       throw new NotFoundException(`O usuário #${id} não existe.`);
     }
+    return true;
+  }
+
+  parseBirthToDateTime(
+    data: UpdateUserDto | PatchUserDto,
+  ): UpdateUserDto | PatchUserDto {
+    if (data.birth) {
+      if (!(data.birth instanceof Date)) {
+        data.birth = new Date(data.birth);
+      }
+    }
+    return data;
   }
 }

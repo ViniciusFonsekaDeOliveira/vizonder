@@ -16,6 +16,7 @@ import { CreateUserDto } from './create.user.dto';
 import { UpdateUserDto } from './update.user.dto';
 import { PatchUserDto } from './patch.user.dto';
 import { LogIntecerptor } from '../interceptors/log.interceptor';
+import { User } from '@prisma/client';
 
 @UseInterceptors(LogIntecerptor)
 @Controller('user')
@@ -28,20 +29,20 @@ export class UserController {
   }
 
   @Get(':id')
-  async show(@Param('id', ParseIntPipe) id: number): Promise<object> {
-    return await this.userService.show(id);
+  async findById(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return await this.userService.findById(id);
   }
 
   @Post()
-  async save(@Body() user: CreateUserDto): Promise<object> {
-    return await this.userService.save(user);
+  async create(@Body() user: CreateUserDto): Promise<User> {
+    return await this.userService.create(user);
   }
 
   @Patch(':id')
   async updatePartial(
     @Param('id', ParseIntPipe) id: number,
     @Body() userData: PatchUserDto,
-  ): Promise<object> {
+  ): Promise<User> {
     return this.userService.updatePartial(id, userData);
   }
 
@@ -50,7 +51,7 @@ export class UserController {
     //Informações não passadas são zeradas.
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
-  ): Promise<object> {
+  ): Promise<User> {
     return this.userService.update(id, data);
   }
 

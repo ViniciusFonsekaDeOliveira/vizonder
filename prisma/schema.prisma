@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id         Int      @unique(map: "userid_UNIQUE") @default(autoincrement())
-  username   String   @db.VarChar(32)
-  nickname   String   @unique(map: "username_UNIQUE") @db.VarChar(16)
-  email      String   @unique(map: "email_UNIQUE") @db.VarChar(255)
-  password   String   @db.VarChar(32)
-  created_at DateTime @default(now()) @db.Timestamp(0)
-  updated_at DateTime @default(now()) @db.Timestamp(0)
+  id         Int       @unique(map: "userid_UNIQUE") @default(autoincrement())
+  username   String    @db.VarChar(32)
+  nickname   String    @unique(map: "username_UNIQUE") @db.VarChar(16)
+  email      String    @unique(map: "email_UNIQUE") @db.VarChar(255)
+  password   String    @db.VarChar(32)
+  birth      DateTime? @db.Date
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
 
   @@id([id, nickname, email])
 }
