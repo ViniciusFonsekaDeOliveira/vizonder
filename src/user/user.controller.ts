@@ -48,7 +48,6 @@ export class UserController {
 
   @Put(':id')
   async update(
-    //Informações não passadas são zeradas.
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
   ): Promise<User> {
