@@ -7,7 +7,7 @@ import { UserModule } from '../user/user.module';
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.secret,
+      secret: process.env.SECRET,
     }),
     UserModule,
   ],

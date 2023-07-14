@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthLoginDTO } from './auth.login.dto';
 import { AuthService } from './auth.service';
 import { AuthRegisterDTO } from './auth.register.dto';
@@ -31,14 +31,17 @@ export class AuthController {
     return this.authService.reset(user);
   }
 
-  // @Post('me')
-  // async me(@Headers('authorization') token) {
-  //   return this.authService.verifyToken(token ? token.split(' ')[1] : '');
-  // }
-
+  //Rota Post protegida
   @UseGuards(AuthGuard)
   @Post('me')
   async me(@User('email') user) {
+    return { user };
+  }
+
+  //Rota Get Protegida
+  @UseGuards(AuthGuard)
+  @Get('me')
+  async dashboard(@User() user) {
     return { user };
   }
 }
