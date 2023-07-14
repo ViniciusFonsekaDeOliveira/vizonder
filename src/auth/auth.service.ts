@@ -10,6 +10,7 @@ import { AuthLoginDTO } from './auth.login.dto';
 import { AuthRecoverDTO } from './auth.recover.dto';
 import { AuthResetDTO } from './auth.reset.dto';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -70,9 +71,12 @@ export class AuthService {
   }
 
   async login({ email, password }: AuthLoginDTO) {
-    const user = await this.userService.findByEmailAndPassword(email, password);
+    const user = await this.userService.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('Dados incorretos!');
+      throw new UnauthorizedException('Email ou senha incorretos!');
+    }
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Email ou senha incorretos!');
     }
     return this.createToken(user);
   }

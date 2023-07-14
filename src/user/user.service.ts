@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +8,7 @@ import { UpdateUserDto } from './update.user.dto';
 import { PatchUserDto } from './patch.user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -36,29 +37,27 @@ export class UserService {
     });
   }
 
-  async create({
-    username,
-    nickname,
-    email,
-    password,
-  }: CreateUserDto): Promise<User> {
+  async create(userData: CreateUserDto): Promise<User> {
+    //Criptografando a senha
+    await this.encryptPassword(userData);
+
     try {
       return await this.prisma.user.create({
-        data: {
-          username,
-          nickname,
-          email,
-          password,
-        },
+        data: userData,
       });
     } catch (error) {
-      console.error('Erro ao executar operação no Prisma:', error);
-      throw new ConflictException('Erro ao salvar usuário');
+      throw new BadRequestException(
+        'Erro ao salvar usuário no Prisma\n',
+        error,
+      );
     }
   }
 
   async updatePartial(id: number, userData: PatchUserDto): Promise<User> {
+    await this.exists(id);
     this.parseBirthToDateTime(userData);
+    await this.encryptPassword(userData);
+
     return this.prisma.user.update({
       where: {
         id,
@@ -68,7 +67,10 @@ export class UserService {
   }
 
   async update(id: number, userData: UpdateUserDto): Promise<User> {
+    await this.exists(id);
     this.parseBirthToDateTime(userData);
+    await this.encryptPassword(userData);
+
     return this.prisma.user.update({
       where: { id },
       data: userData,
@@ -76,6 +78,7 @@ export class UserService {
   }
 
   async delete(id: number) {
+    await this.exists(id);
     console.log(`Deleting user #${id} from database.`);
     await this.prisma.user.delete({
       where: { id },
@@ -98,5 +101,11 @@ export class UserService {
       }
     }
     return data;
+  }
+
+  async encryptPassword(data: CreateUserDto | PatchUserDto | UpdateUserDto) {
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, await bcrypt.genSalt());
+    }
   }
 }
