@@ -86,7 +86,7 @@ export class AuthService {
     return this.createToken(user);
   }
 
-  async recover({ email }: AuthRecoverDTO) {
+  async recoverPassword({ email }: AuthRecoverDTO) {
     const user = await this.userService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Email não encontrado!');
@@ -97,7 +97,7 @@ export class AuthService {
     return true;
   }
 
-  async reset({ token, password }: AuthResetDTO) {
+  async resetPassword({ token, password }: AuthResetDTO) {
     //TO DO: validar o token
     //Extrair id do token
     console.log(token);

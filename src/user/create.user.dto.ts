@@ -29,4 +29,10 @@ export class CreateUserDto {
     minUppercase: 0,
   })
   password: string;
+
+  @IsOptional()
+  photo: string;
+
+  @IsOptional()
+  photos: string;
 }

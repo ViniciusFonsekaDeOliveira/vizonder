@@ -6,9 +6,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     ThrottlerModule.forRoot({
       ignoreUserAgents: [/googlebot/gi],
       ttl: 60,
@@ -17,6 +20,7 @@ import { APP_GUARD } from '@nestjs/core';
     UserModule,
     PrismaModule,
     AuthModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [

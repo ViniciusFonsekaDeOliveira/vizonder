@@ -2,13 +2,19 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseIntPipe,
   Patch,
   Post,
   Put,
+  UploadedFile,
+  UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -17,6 +23,9 @@ import { UpdateUserDto } from './update.user.dto';
 import { PatchUserDto } from './patch.user.dto';
 import { LogIntecerptor } from '../interceptors/log.interceptor';
 import { User } from '@prisma/client';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { AuthGuard } from '../guards/auth.guard';
+import { UserDecorator } from '../decorators/user.decorator';
 
 @UseInterceptors(LogIntecerptor)
 @Controller('user')
@@ -58,5 +67,44 @@ export class UserController {
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
     await this.userService.delete(id);
+  }
+
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(AuthGuard)
+  @Post('photo')
+  async uploadPhoto(
+    @UserDecorator() user: User,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          //TO DO Pipes personalizados para processamento de imagem aqui...
+          new FileTypeValidator({ fileType: 'image/png' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 310 }),
+        ],
+      }),
+    )
+    photo: Express.Multer.File,
+  ) {
+    return this.userService.uploadPhoto(user, photo);
+  }
+
+  @UseInterceptors(FilesInterceptor('file', 5))
+  @UseGuards(AuthGuard)
+  @Post('photos')
+  async uploadPhotos(
+    @UserDecorator() user: User,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          //TO DO Pipes personalizados para processamento de imagem aqui...
+          new FileTypeValidator({ fileType: 'image/png' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 310 }),
+        ],
+      }),
+    )
+    photos: Express.Multer.File[],
+  ) {
+    console.log(photos.length);
+    return this.userService.uploadPhotos(user, photos);
   }
 }

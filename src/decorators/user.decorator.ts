@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-export const User = createParamDecorator(
+export const UserDecorator = createParamDecorator(
   (filter: string, context: ExecutionContext) => {
     const request = context.switchToHttp().getRequest();
     //usa o campo que o guard criou dentro do request.
