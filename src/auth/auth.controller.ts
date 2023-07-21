@@ -19,13 +19,13 @@ export class AuthController {
     return this.authService.register(user);
   }
 
-  @Post('recover')
-  async recover(@Body() user: AuthRecoverDTO) {
-    this.authService.recoverPassword(user);
+  @Post('forgot')
+  async forgotPassword(@Body() user: AuthRecoverDTO) {
+    return this.authService.forgotPassword(user);
   }
 
   @Post('reset')
-  async reset(@Body() user: AuthResetDTO) {
+  async resetPassword(@Body() user: AuthResetDTO) {
     return this.authService.resetPassword(user);
   }
 }
