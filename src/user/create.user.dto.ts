@@ -1,6 +1,7 @@
 import {
   IsDateString,
   IsEmail,
+  IsJWT,
   IsOptional,
   IsString,
   IsStrongPassword,
@@ -35,4 +36,8 @@ export class CreateUserDto {
 
   @IsOptional()
   photos: string;
+
+  @IsJWT()
+  @IsOptional()
+  lastToken: string;
 }

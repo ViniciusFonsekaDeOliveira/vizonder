@@ -24,21 +24,26 @@ export class AuthService {
     private readonly mailerService: MailerService,
   ) {}
 
-  createToken(user: User) {
+  async createToken(user: User) {
+    const token = this.jwtService.sign(
+      {
+        id: user.id,
+        name: user.nickname,
+        email: user.email,
+      },
+      {
+        subject: String(user.id),
+        expiresIn: '7 days',
+        issuer: this.issuer,
+        audience: this.audience,
+      },
+    );
+
+    //To invalidate the older valid token.
+    await this.userService.updatePartial(user.id, { lastToken: token });
+
     return {
-      acessToken: this.jwtService.sign(
-        {
-          id: user.id,
-          name: user.nickname,
-          email: user.email,
-        },
-        {
-          subject: String(user.id),
-          expiresIn: '7 days',
-          issuer: this.issuer,
-          audience: this.audience,
-        },
-      ),
+      acessToken: token,
     };
   }
 
@@ -161,16 +166,4 @@ export class AuthService {
     //TO DO: Remover o tempToken do cache ou do bd.
     return this.createToken(user);
   }
-
-  /** GAP: Ao solicitar nova senha
-   * o usuário de fato pode apenas logar no sistema com a nova senha.
-   * Porém o token antigo, criado com a senha antiga,
-   *  continua válido até que ele expire. Permitindo que o usuário
-   * seja autorizado a entrar em rotas protegidas tanto com o novo
-   * quanto com o velho token. Dessa forma mesmo que o usuário troque a senha
-   * algum invasor que ainda detém o token antigo, consegue utilizar a conta
-   * invadida até que o token antigo expire e novo login seja necessário
-   *
-   * Solução: revogar token antigo.
-   *  */
 }

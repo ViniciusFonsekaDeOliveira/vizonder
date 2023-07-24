@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { UserService } from '../user/user.service';
 
@@ -16,10 +21,22 @@ export class AuthGuard implements CanActivate {
 
     try {
       const data = this.authService.verifyToken(authorization);
+
       //cria um atributo tokenPayload no request passando os dados do token
       request.tokenPayload = data;
       //cria um atributo user no request passando os dados do usuário do banco
       request.user = await this.userService.findById(data.id);
+
+      //Verifica se o token atual do usuário corresponde qualquer aquele que está autorizado.
+      if (request.user.lastToken !== authorization) {
+        /**
+         * Isso adiciona uma camada extra de segurança
+         * para evitar que tokens antigos sejam usados
+         * indevidamente após o usuário redefinir a senha
+         * ou realizar outras ações que gerem novos tokens.
+         */
+        throw new UnauthorizedException('Token inválido ou expirado');
+      }
 
       return true;
     } catch (e) {

@@ -16,6 +16,7 @@ model User {
   birth      DateTime? @db.Date
   photo      String?   @db.VarChar(127)
   photos     Json?     
+  lastToken  String?   @db.VarChar(100)
   created_at DateTime  @default(now()) @db.Timestamp(0)
   updated_at DateTime  @default(now()) @db.Timestamp(0)
 
