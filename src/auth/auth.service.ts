@@ -28,8 +28,6 @@ export class AuthService {
     const token = this.jwtService.sign(
       {
         id: user.id,
-        name: user.nickname,
-        email: user.email,
       },
       {
         subject: String(user.id),
@@ -115,9 +113,6 @@ export class AuthService {
     const tempToken = this.jwtService.sign(
       {
         id: user.id,
-        username: user.username,
-        email: user.email,
-        nickname: user.nickname,
       },
       {
         subject: String(user.id),
