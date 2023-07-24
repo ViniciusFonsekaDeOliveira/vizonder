@@ -27,8 +27,10 @@ export class AuthGuard implements CanActivate {
       //cria um atributo user no request passando os dados do usuário do banco
       request.user = await this.userService.findById(data.id);
 
-      //Verifica se o token atual do usuário corresponde qualquer aquele que está autorizado.
-      if (request.user.lastToken !== authorization) {
+      //Verifica se o token autorizado é o token atual do usuário .
+      if (
+        request.user.lastToken !== this.authService.parseToken(authorization)
+      ) {
         /**
          * Isso adiciona uma camada extra de segurança
          * para evitar que tokens antigos sejam usados
