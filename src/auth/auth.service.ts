@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,6 +13,8 @@ import { AuthResetDTO } from './auth.reset.dto';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer/dist';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +25,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly mailerService: MailerService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheService: Cache,
   ) {}
 
   async createToken(user: User) {
@@ -40,9 +45,7 @@ export class AuthService {
     //To invalidate the older valid token.
     await this.userService.updatePartial(user.id, { lastToken: token });
 
-    return {
-      acessToken: token,
-    };
+    return token;
   }
 
   verifyToken(token: string) {
@@ -96,12 +99,22 @@ export class AuthService {
     if (!(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Email ou senha incorretos!');
     }
-    return this.createToken(user);
+    return {
+      user: user,
+      logged: true,
+      token: this.createToken(user),
+      message: 'Login successful',
+    };
   }
 
   async register(userData: AuthRegisterDTO) {
     const user = await this.userService.create(userData);
-    return this.createToken(user);
+    return {
+      user: user,
+      logged: true,
+      token: this.createToken(user),
+      message: 'Registered successful',
+    };
   }
 
   async forgotPassword({ email }: AuthRecoverDTO) {
@@ -122,15 +135,17 @@ export class AuthService {
       },
     );
 
-    //TO DO: Armazenar o token em cache com tempo de expiração de 15 min
+    //Armazena o token em cache com tempo de expiração de 15 min
+    await this.cacheService.set(String(user.id), tempToken, 900000);
 
     /* 
 
-    TO DO: Enviar um email contendo um link único contendo nele 
-    o tempToken como um paramero de consulta na URL:
-    ("https://seusite.com/reset-password?token=SEU_TOKEN_AQUI")
+    Link único contendo nele 
+    o tempToken como um parâmero de consulta na URL:
 
     */
+    const link = `https://localhost:3000/auth/reset?token=${tempToken}`;
+
     //Enviar o e-mail...
     await this.mailerService.sendMail({
       subject: 'Recuperação de senha',
@@ -138,16 +153,17 @@ export class AuthService {
       template: 'forget',
       context: {
         name: user.username,
-        //idealmente redireciona para um front-end com formulário para reset, mas como é uma api...
-        token: tempToken,
+        link: link,
       },
     });
 
-    return true;
+    return {
+      message: 'E-mail enviado com sucesso! Verifique sua caixa de entrada.',
+    };
   }
 
   async resetPassword({ token, password }: AuthResetDTO) {
-    //TO DO: validar se token é valido e está dentro do prazo.
+    //Valida se token é valido e está dentro do prazo.
     const tokenPayload = this.verifyTemporaryToken(token);
 
     //Extrai id real do token
@@ -158,7 +174,14 @@ export class AuthService {
     }
 
     const user = await this.userService.updatePartial(id, { password });
-    //TO DO: Remover o tempToken do cache ou do bd.
+
+    //Remove o tempToken do cache.
+    await this.cacheService.del(String(id));
+
     return this.createToken(user);
   }
+
+  // async resetPasswordAllowed(token: string) {
+  //   return token;
+  // }
 }

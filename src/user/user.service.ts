@@ -100,14 +100,18 @@ export class UserService {
 
   async existsNickname(nickname: string) {
     if (await this.prisma.user.count({ where: { nickname } })) {
-      throw new ConflictException(`O usuário ${nickname} já existe.`);
+      throw new ConflictException(
+        `O usuário ${nickname} já existe. Faça o Login.`,
+      );
     }
     return false;
   }
 
   async existsEmail(email: string) {
     if (await this.prisma.user.count({ where: { email } })) {
-      throw new ConflictException(`O endereço ${email} já está cadastrado.`);
+      throw new ConflictException(
+        `O endereço ${email} já está cadastrado. Tente fazer o Login`,
+      );
     }
     return false;
   }
